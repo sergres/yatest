@@ -5,11 +5,12 @@ import dateutil.parser
 from itertools import chain
 import re
 
-# http://stackoverflow.com/questions/6562148/python-finding-date-in-a-string/6562492#6562492
+# http://stackoverflow.com/questions/6562148/python-finding-date-in-a-string/
 # Add more strings that confuse the parser in the list
 UNINTERESTING = set(chain(dateutil.parser.parserinfo.JUMP,
                           dateutil.parser.parserinfo.PERTAIN,
                           ['a']))
+
 
 def _get_date(tokens):
     for end in xrange(len(tokens), 0, -1):
@@ -23,6 +24,7 @@ def _get_date(tokens):
             return end, date
         except ValueError:
             pass
+
 
 def find_dates(text, max_tokens=50, allow_overlapping=False):
     tokens = filter(None, re.split(r'(\S+|\W+)', text))
@@ -38,6 +40,7 @@ def find_dates(text, max_tokens=50, allow_overlapping=False):
 
 
 LEVELS = ['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+
 
 class LogFile:
     """one instance per log file"""
@@ -63,7 +66,8 @@ class LogFile:
                 if level == self.log_level:
                     log_level_acceptable = True
                 if log_level_acceptable:
-                    self.log_levels.append(level) # e.g. ['WARNING', 'ERROR', 'CRITICAL']
+                    # e.g. ['WARNING', 'ERROR', 'CRITICAL']
+                    self.log_levels.append(level)
 
         else:
             #never will work, because we have same check in run.py
@@ -77,7 +81,7 @@ class LogFile:
                 return True
         return False
 
-
+    # create new log instance, and return it (TODO: rename it to popLogRecord)
     def getLogRecord(self):
         self.log_record = LogRecord(self.file)
         return self.log_record
@@ -137,4 +141,3 @@ class LogRecord:
         for date in find_dates(str, allow_overlapping=False):
             return date
         return False
-
