@@ -8,7 +8,6 @@ class LogFile:
     path = None
     log_level = None
     log_record = None
-    is_empty = False
 
     def __init__(self, log_path, log_level):
         self.path = log_path
@@ -32,7 +31,7 @@ class LogFile:
         return self.log_record.GetTimeStamp()
 
     def isEmpty(self):
-        return self.is_empty
+        return self.log_record.is_empty
 
 
 class LogRecord:
@@ -40,21 +39,30 @@ class LogRecord:
     fp = None
     lines = None
     timestamp = None
+    is_empty = False
+
     def __init__(self, fp):
         self.fp = fp
-        self.lines = fp.readline()
-        #handle time stamp
-        print self.lines[0:20]
-        #self.timestamp = parse(self._fix_string(self.lines), fuzzy=True)
-        self.timestamp = parse(self.lines[0:20], fuzzy=True)
-        print self.timestamp
+        self.lines = self.fp.readline()
+        #print self.lines[0:30]
+        # assume date is in first 20 chars
+        self.timestamp = self.parse(self.lines[0:30])
         if '' == self.lines:
+            self.is_empty = True
             return
+
         #handle multiline log records
-        next_line = fp.readline()
-        while next_line[0] in ' ':
-            self.lines += next_line
-            next_line = fp.readline()
+        # while True:
+        #     file_pos = self.fp.tell()
+        #     nextg_line = self.fp.readline()
+        #     try:
+        #         parse(next_line[0:20], fuzzy=True)
+        #         #this line has datetime string, let leave it for nex logRecord
+        #         self.fp.seek(file_pos)
+        #         return
+        #     except :
+        #         #after check - add to current log record
+        #         self.lines += next_line
 
     def _fix_string(self, log_line):
         #TODO
@@ -64,5 +72,23 @@ class LogRecord:
     def GetTimeStamp(self):
         return self.timestamp
 
-    def __unicode__(self):
+    def __str__(self):
         return self.lines
+
+    def parse(self, str):
+        timestamp = None
+        try:
+            timestamp = parse(str[0:20], fuzzy=True)
+        except:
+            pass
+
+        try:
+            timestamp = parse(str, fuzzy=True)
+        except:
+            pass
+
+        try:
+            timestamp = parse(str, yearfirst=True, fuzzy=True)
+        except:
+            pass
+        return timestamp

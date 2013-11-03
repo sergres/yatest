@@ -2,7 +2,7 @@
 import argparse
 import os.path
 from logger import LogFile, LEVELS
-
+from datetime import datetime
 
 def is_valid_file(parser, arg):
     if not os.path.isfile(arg):
@@ -27,15 +27,24 @@ if __name__ == '__main__':
     args = parser.parse_args()
     logfiles = []
     for log in args.logfiles:
-        print log
-        print args.level
+        # print log
+        # print args.level
         logfiles.append(LogFile(log_path=log, log_level=args.level))
 
     while len(logfiles):
+        dt = datetime.now()
+        #here we will put log record with minmum datetime
+        min_log = None
         for log_file in logfiles:
-            print log_file.GetCurrTimeStamp()
-            if log_file.isEmpty():
-                pass
+            if log_file.GetCurrTimeStamp() <= dt:
+                dt = log_file.GetCurrTimeStamp()
+                min_log = log_file
+        print min_log.GetCurrTimeStamp(),min_log.getLogRecord(),
+        if min_log.isEmpty():
+            logfiles.pop(logfiles.index(min_log))
+            # print " file is empty"
+
+
 
 
 
