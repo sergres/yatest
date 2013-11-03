@@ -37,13 +37,14 @@ def find_dates(text, max_tokens=50, allow_overlapping=False):
                 yield date
 
 
-LEVELS = ['DEBUG', 'WARN', 'ERROR', 'CRITICALL', 'NOTICE']
+LEVELS = ['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
 
 class LogFile:
     """one instance per log file"""
     file = None
     path = None
     log_level = None
+    log_levels = []
     log_record = None
 
     def __init__(self, log_path, log_level):
@@ -52,13 +53,30 @@ class LogFile:
             self.file = open(self.path)
         except Exception, e:
             raise e
+
         if log_level in LEVELS:
             self.log_level = log_level
+
+            # calculate log levels, which are ok
+            log_level_acceptable = False
+            for level in LEVELS:
+                if level == self.log_level:
+                    log_level_acceptable = True
+                if log_level_acceptable:
+                    self.log_levels.append(level) # e.g. ['WARNING', 'ERROR', 'CRITICAL']
+
         else:
             #never will work, because we have same check in run.py
             print log_level + " - invalid log level value. "
             exit(-1)
         self.getLogRecord()
+
+    def check_log_level(self, str):
+        for l in self.log_levels:
+            if l.lower().find(str.lower()):
+                return True
+        return False
+
 
     def getLogRecord(self):
         self.log_record = LogRecord(self.file)

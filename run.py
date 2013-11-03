@@ -17,6 +17,7 @@ if __name__ == '__main__':
                         '--level',
                         choices=LEVELS,
                         help="log level filter",
+                        default='NOTSET'
                         )
 
     parser.add_argument('logfiles',
@@ -39,8 +40,8 @@ if __name__ == '__main__':
             if log_file.GetCurrTimeStamp() <= dt:
                 dt = log_file.GetCurrTimeStamp()
                 min_log = log_file
-        min_log.getLogRecord(),
-        print min_log.GetCurrTimeStamp(), min_log.path
+        print min_log.getLogRecord(),
+        # print min_log.GetCurrTimeStamp(), min_log.path
         if min_log.isEmpty():
             logfiles.pop(logfiles.index(min_log))
             # print " file is empty"
