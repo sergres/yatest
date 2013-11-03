@@ -31,6 +31,12 @@ if __name__ == '__main__':
         print args.level
         logfiles.append(LogFile(log_path=log, log_level=args.level))
 
-    for log_file in logfiles:
-        print log_file.GetCurrTimeStamp()
-        pass
+    while len(logfiles):
+        for log_file in logfiles:
+            print log_file.GetCurrTimeStamp()
+            if log_file.isEmpty():
+                pass
+
+
+
+

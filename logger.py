@@ -8,6 +8,7 @@ class LogFile:
     path = None
     log_level = None
     log_record = None
+    is_empty = False
 
     def __init__(self, log_path, log_level):
         self.path = log_path
@@ -30,6 +31,9 @@ class LogFile:
     def GetCurrTimeStamp(self):
         return self.log_record.GetTimeStamp()
 
+    def isEmpty(self):
+        return self.is_empty
+
 
 class LogRecord:
     """contains one log record"""
@@ -40,9 +44,12 @@ class LogRecord:
         self.fp = fp
         self.lines = fp.readline()
         #handle time stamp
-        print self.lines
-        self.timestamp = parse(self._fix_string(self.lines), fuzzy=True)
+        print self.lines[0:20]
+        #self.timestamp = parse(self._fix_string(self.lines), fuzzy=True)
+        self.timestamp = parse(self.lines[0:20], fuzzy=True)
         print self.timestamp
+        if '' == self.lines:
+            return
         #handle multiline log records
         next_line = fp.readline()
         while next_line[0] in ' ':
