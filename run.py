@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import argparse
 import os.path
+from logger import LogFile, LEVELS
 
-LEVELS = ['DEBUG', 'WARN', 'ERROR', 'CRITICALL', 'NOTICE']
 
 def is_valid_file(parser, arg):
     if not os.path.isfile(arg):
@@ -25,4 +25,12 @@ if __name__ == '__main__':
                         type=lambda x: is_valid_file(parser,x))
 
     args = parser.parse_args()
-    #print args
+    logfiles = []
+    for log in args.logfiles:
+        print log
+        print args.level
+        logfiles.append(LogFile(log_path=log, log_level=args.level))
+
+    for log_file in logfiles:
+        print log_file.GetCurrTimeStamp()
+        pass
