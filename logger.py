@@ -1,4 +1,41 @@
-from dateutil.parser import parse
+from dateutil import parser
+from datetime import datetime
+
+import dateutil.parser
+from itertools import chain
+import re
+
+# http://stackoverflow.com/questions/6562148/python-finding-date-in-a-string/6562492#6562492
+# Add more strings that confuse the parser in the list
+UNINTERESTING = set(chain(dateutil.parser.parserinfo.JUMP,
+                          dateutil.parser.parserinfo.PERTAIN,
+                          ['a']))
+
+def _get_date(tokens):
+    for end in xrange(len(tokens), 0, -1):
+        region = tokens[:end]
+        if all(token.isspace() or token in UNINTERESTING
+               for token in region):
+            continue
+        text = ''.join(region)
+        try:
+            date = dateutil.parser.parse(text)
+            return end, date
+        except ValueError:
+            pass
+
+def find_dates(text, max_tokens=50, allow_overlapping=False):
+    tokens = filter(None, re.split(r'(\S+|\W+)', text))
+    skip_dates_ending_before = 0
+    for start in xrange(len(tokens)):
+        region = tokens[start:start + max_tokens]
+        result = _get_date(region)
+        if result is not None:
+            end, date = result
+            if allow_overlapping or end > skip_dates_ending_before:
+                skip_dates_ending_before = end
+                yield date
+
 
 LEVELS = ['DEBUG', 'WARN', 'ERROR', 'CRITICALL', 'NOTICE']
 
@@ -46,28 +83,31 @@ class LogRecord:
         self.lines = self.fp.readline()
         #print self.lines[0:30]
         # assume date is in first 20 chars
-        self.timestamp = self.parse(self.lines[0:30])
+        self.timestamp = self.parse(self.lines)
         if '' == self.lines:
             self.is_empty = True
             return
 
         #handle multiline log records
-        # while True:
-        #     file_pos = self.fp.tell()
-        #     nextg_line = self.fp.readline()
-        #     try:
-        #         parse(next_line[0:20], fuzzy=True)
-        #         #this line has datetime string, let leave it for nex logRecord
-        #         self.fp.seek(file_pos)
-        #         return
-        #     except :
-        #         #after check - add to current log record
-        #         self.lines += next_line
+        while True:
+            file_pos = self.fp.tell()
+            next_line = self.fp.readline()
+            if '' == next_line:
+                self.is_empty = True
+                return
 
-    def _fix_string(self, log_line):
-        #TODO
-        log_line = log_line.replace('mac-shchypas', 'macshchypas')
-        return log_line
+            #print self.parse(next_line[0:20]), next_line,
+            if self.parse(next_line[0:20]):
+
+                # print next_line, self.parse(next_line[0:20]),
+                #this line has datetime string, let leave it for nex logRecord
+                self.fp.seek(file_pos)
+                return
+            else:
+                #after check - add to current log record
+                # print 'second line'
+                # print next_line,
+                self.lines += next_line
 
     def GetTimeStamp(self):
         return self.timestamp
@@ -76,19 +116,7 @@ class LogRecord:
         return self.lines
 
     def parse(self, str):
-        timestamp = None
-        try:
-            timestamp = parse(str[0:20], fuzzy=True)
-        except:
-            pass
+        for date in find_dates(str, allow_overlapping=False):
+            return date
+        return False
 
-        try:
-            timestamp = parse(str, fuzzy=True)
-        except:
-            pass
-
-        try:
-            timestamp = parse(str, yearfirst=True, fuzzy=True)
-        except:
-            pass
-        return timestamp
