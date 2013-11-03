@@ -4,11 +4,12 @@ import os.path
 from logger import LogFile, LEVELS
 from datetime import datetime
 
+
 def is_valid_file(parser, arg):
     if not os.path.isfile(arg):
-       parser.error("%s - is not a file, or does not exist!"%arg)
+        parser.error("%s - is not a file, or does not exist!" % arg)
     else:
-       return arg
+        return arg
 
 
 if __name__ == '__main__':
@@ -23,7 +24,7 @@ if __name__ == '__main__':
     parser.add_argument('logfiles',
                         nargs='+',
                         help='enter path of log file[s]',
-                        type=lambda x: is_valid_file(parser,x))
+                        type=lambda x: is_valid_file(parser, x))
 
     args = parser.parse_args()
     logfiles = []
@@ -45,9 +46,3 @@ if __name__ == '__main__':
         if min_log.isEmpty():
             logfiles.pop(logfiles.index(min_log))
             # print " file is empty"
-
-
-
-
-
-
