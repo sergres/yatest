@@ -1,3 +1,4 @@
+from dateutil.parser import parse
 
 LEVELS = ['DEBUG', 'WARN', 'ERROR', 'CRITICALL', 'NOTICE']
 
@@ -34,9 +35,27 @@ class LogRecord:
     """contains one log record"""
     fp = None
     lines = None
+    timestamp = None
     def __init__(self, fp):
         self.fp = fp
         self.lines = fp.readline()
+        #handle time stamp
+        print self.lines
+        self.timestamp = parse(self._fix_string(self.lines), fuzzy=True)
+        print self.timestamp
+        #handle multiline log records
+        next_line = fp.readline()
+        while next_line[0] in ' ':
+            self.lines += next_line
+            next_line = fp.readline()
+
+    def _fix_string(self, log_line):
+        #TODO
+        log_line = log_line.replace('mac-shchypas', 'macshchypas')
+        return log_line
 
     def GetTimeStamp(self):
-        return 'TODO: ' +  self.lines
+        return self.timestamp
+
+    def __unicode__(self):
+        return self.lines
