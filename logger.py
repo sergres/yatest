@@ -39,7 +39,7 @@ def find_dates(text, max_tokens=50, allow_overlapping=False):
                 yield date
 
 
-LEVELS = ['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+LEVELS = ['NOTSET', 'DEBUG', 'NOTICE', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
 
 
 class LogFile:
@@ -73,11 +73,16 @@ class LogFile:
             #never will work, because we have same check in run.py
             print log_level + " - invalid log level value. "
             exit(-1)
-        self.getLogRecord()
-
+        while True:
+            self.getLogRecord()
+            print 'aa', self.log_record.lines
+            if (self.check_log_level(self.log_record.lines) or not self.log_record.lines):
+                break
     def check_log_level(self, str):
+        if 'NOTSET' ==  self.log_level:
+            return True
         for l in self.log_levels:
-            if l.lower().find(str.lower()):
+            if l.lower() in str.lower():
                 return True
         return False
 

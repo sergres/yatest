@@ -38,11 +38,10 @@ if __name__ == '__main__':
         #here we will put log record with minmum datetime
         min_log = None
         for log_file in logfiles:
+            if log_file.isEmpty():
+                logfiles.pop(logfiles.index(log_file))
+                continue
             if log_file.GetCurrTimeStamp() <= dt:
                 dt = log_file.GetCurrTimeStamp()
                 min_log = log_file
-        print min_log.getLogRecord(),
-        # print min_log.GetCurrTimeStamp(), min_log.path
-        if min_log.isEmpty():
-            logfiles.pop(logfiles.index(min_log))
-            # print " file is empty"
+                print min_log.getLogRecord(),
